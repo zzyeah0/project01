@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;nicdcp_frontend2&apos;" deleteContents="true" description="Delete resource &apos;nicdcp_frontend2&apos;" element1="/nicdcp_frontend2" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1621842280817"/>&#x0A;<refactoring comment="Delete resource &apos;ff&apos;" deleteContents="true" description="Delete resource &apos;ff&apos;" element1="/ff" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1621842492756"/>
+</session>

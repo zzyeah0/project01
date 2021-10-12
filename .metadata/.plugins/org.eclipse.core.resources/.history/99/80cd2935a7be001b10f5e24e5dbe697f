@@ -1,0 +1,96 @@
+package action;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import model.LearningDAO;
+import model.LearningDTO;
+
+public class learningSearchAction implements Action {
+
+	@Override
+	public ActionForward execute(HttpServletRequest request, HttpServletResponse response) throws IOException {		
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String learning_emp = request.getParameter("learning_emp");
+		
+		int rowsize = 0;
+		int block = 5; 			// 아래에 보여질 페이지의 최대 수 - 예) [1][2][3][4][5] / [6]...
+		int totalRecord = 0;    // DB 상의 레코드 전체 수(게시글의 수)
+		int allPage = 0;		// 전체 페이지의 수 - totalRecord / rowsize
+		int page = 0;
+				
+		if(request.getParameter("page") != null) {
+			page = Integer.parseInt(request.getParameter("page"));			
+		}
+		
+		if(request.getParameter("rowSize") != null) {
+			rowsize = Integer.parseInt(request.getParameter("rowSize"));			
+		}
+				
+		response.getWriter().write(getJSON(startDate, endDate, learning_emp, page, rowsize));
+						
+		// 해당 페이지의 시작/마지막 블럭
+		int startBlock = (((page - 1) / block) * block) + 1;
+		int endBlock = (((page - 1) / block) * block) + block;
+				
+		LearningDAO dao = LearningDAO.getInstance();		
+		totalRecord = dao.getCount();
+		
+		allPage = (int)Math.ceil(totalRecord/(double)rowsize);
+		
+		if(endBlock > allPage) {
+			endBlock = allPage;
+		}
+		
+		request.setAttribute("page", page);
+		request.setAttribute("rowsize", rowsize);
+		request.setAttribute("block", block);
+		request.setAttribute("totalRecord", totalRecord);
+		request.setAttribute("allPage", allPage);
+		request.setAttribute("startBlock", startBlock);
+		request.setAttribute("endBlock", endBlock);
+		request.setAttribute("startDate", startDate);
+		request.setAttribute("endDate", endDate);
+		
+		
+		ActionForward forward = new ActionForward();
+		forward.setRedirect(false);
+		forward.setPath("learning.jsp");
+		
+		return forward;
+	}
+	
+		public String getJSON(String startDate, String endDate, String learning_emp, int page, int rowsize) {
+			LearningDAO dao = LearningDAO.getInstance();
+			int count = dao.getCount();
+			
+			StringBuffer result = new StringBuffer("");
+			result.append("{\result\":[");
+			List<LearningDTO> list = new ArrayList<LearningDTO>();
+			if(startDate==null && endDate==null && learning_emp==null && page == 0 && rowsize == 0) {							
+				page = 1; 
+				if(count < 10) {
+					rowsize = count;					
+				}
+				rowsize = 10;				
+			}
+			System.out.println(rowsize);
+			list = dao.inquery(startDate, endDate, learning_emp, page, rowsize);				
+					
+			for(int i=0; i<list.size(); i++) {
+				result.append("[{\"value\": \""+list.get(i).getLearning_id() + "\"},");
+				result.append("[{\"value\": \""+list.get(i).getLearning_date() + "\"},");
+				result.append("[{\"value\": \""+list.get(i).getDataset_file() + "\"},");
+				result.append("[{\"value\": \""+list.get(i).getLearning_emp() + "\"},");
+				result.append("[{\"value\": \""+list.get(i).getLearning_state() + "\"}],");
+			}
+			result.append("]}");
+		return result.toString();
+	}
+
+}

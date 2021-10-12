@@ -1,0 +1,26 @@
+package action;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import model.LearningDAO;
+import model.LearningDTO;
+
+public class learningListAction implements Action {
+
+	@Override
+	public ActionForward execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		LearningDAO dao = LearningDAO.getInstance();		
+		List<LearningDTO> list = dao.inquery(1, 10, null, null);
+		
+		request.setAttribute("list", list);	
+		ActionForward forward = new ActionForward();
+		forward.setRedirect(false);
+		forward.setPath("learning.jsp");
+		
+		return forward;
+	}
+}

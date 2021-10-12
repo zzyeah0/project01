@@ -1,0 +1,96 @@
+package action;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Calendar;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.oreilly.servlet.MultipartRequest;
+import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
+
+import model.LearningDTO;
+
+public class dataUploadAction implements Action {
+	
+	@Override
+	public ActionForward execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		LearningDTO dto = new LearningDTO();
+								
+		String saveFolder = "C:\\JAVA\\Project\\nicdcp_frontend\\src\\main\\webapp\\File";		
+		int fileSize = 1000 * 1024 * 1024;		
+		// DefaultFileRenamePolicy policy = new DefaultFileRenamePolicy();
+		try {
+			MultipartRequest multi = new MultipartRequest(request, saveFolder, fileSize, "utf-8", null);
+			File upload_file = multi.getFile("file");
+			
+			if(upload_file != null) { 
+				String fileName = upload_file.getName();
+				Calendar cal = Calendar.getInstance();
+				int year = cal.get(Calendar.YEAR);
+				int month = cal.get(Calendar.MONTH) + 1;
+				int day = cal.get(Calendar.DAY_OF_MONTH);
+				String homedir = saveFolder + "/" + year + "-" + month + "-" + day;
+				File path1 = new File(homedir);
+				if(!path1.exists()); {
+					path1.mkdirs();
+				}
+				
+				String refileName = fileName;
+				upload_file.renameTo(new File(homedir+"/"+refileName));
+				
+				System.out.println("업로드성공");
+			// dto.setDataset_file(fileName);
+			}
+			
+		
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.getStackTrace();
+		}
+		
+		/* String imgName = "";
+		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+		
+		if(isMultipart) {
+			DiskFileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			try {
+				List<FileItem> items = upload.parseRequest(request);
+				Iterator<FileItem> iter = items.iterator();
+				
+				while(iter.hasNext()) {
+					FileItem item = iter.next();
+					
+					String name = item.getFieldName();
+					String fileName = item.getName();
+					String contentType = item.getContentType();
+					boolean isInMemory = item.isInMemory();
+					long sizeInBytes = item.getSize();
+					
+					System.out.println("파일이름: "+ fileName);
+					
+					imgName = fileName;
+					String uploadUri = "/file/photo";
+					
+					String dir = request.getSession().getServletContext().getRealPath(uploadUri);
+					System.out.println(uploadUri+"의 물리적 경로: "+dir);
+					item.write(new File(dir, imgName));
+					
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		} */
+		ActionForward forward = new ActionForward();
+		forward.setRedirect(false);
+		forward.setPath("page2.jsp");
+		
+		return forward;
+	
+	}
+
+}

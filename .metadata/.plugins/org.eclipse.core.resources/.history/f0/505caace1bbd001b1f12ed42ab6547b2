@@ -1,0 +1,55 @@
+package action;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import model.LearningDAO;
+import model.LearningDTO;
+import model.TransactionDAO;
+import model.TransactionDTO;
+
+public class dashboardAction implements Action {
+
+	@Override
+	public ActionForward execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		TransactionDAO t_dao = TransactionDAO.getInstance();		
+		
+		int total = t_dao.getCount(0);
+		int u_nor = t_dao.getCount(1);
+		int u_ab = t_dao.getCount(2);
+		int u_do = t_dao.getCount(3);
+		int nor_ab = t_dao.getCount(4);
+		int ab_nor = t_dao.getCount(5);
+		int ab_ab = t_dao.getCount(6);
+		int do_nor = t_dao.getCount(7);
+		int do_ab = t_dao.getCount(8);		
+		
+		int t_nor = u_nor + ab_nor + do_nor;
+		int t_ab = nor_ab + ab_ab + do_ab;
+		int d_nor = u_nor + nor_ab;
+		int d_ab = u_ab + ab_nor + ab_ab;
+		int d_do = u_do + do_nor + do_ab;
+		int undefined = u_ab + u_do;
+				
+		int[] array = new int[]{total, t_nor, t_ab, d_nor, d_ab, d_do, undefined};
+		request.setAttribute("array", array);
+		List<TransactionDTO> t_dto = t_dao.getTranList(1, 10, 3);
+		request.setAttribute("t_dto", t_dto);				
+		
+		LearningDAO l_dao = LearningDAO.getInstance();
+		int l_count = l_dao.getLearnCount();
+		List<LearningDTO> l_list = l_dao.getLearnList(l_count);
+		LearningDTO l_dto = l_list.get(0);
+		request.setAttribute("l_dto", l_dto);
+				
+		ActionForward forward = new ActionForward();
+		forward.setRedirect(false);
+		forward.setPath("dashboard.jsp");
+		
+		return forward;
+	}
+
+}

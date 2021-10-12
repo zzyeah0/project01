@@ -1,0 +1,313 @@
+package model;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LearningDAO {
+	private Connection conn;
+	private PreparedStatement pstmt;
+	private ResultSet rs;
+	String sql = null;
+	
+	private static LearningDAO instance = new LearningDAO();
+	private LearningDAO() {}
+	
+	public static LearningDAO getInstance() {
+		if(instance == null) {
+			instance = new LearningDAO();
+		}
+		return instance;
+	}
+		
+	public Connection openConn() {
+		try {
+			String dbURL = "jdbc:mariadb://localhost:3306/nicdcp";
+			String dbID = "root";
+			String dbPWD = "niccompany";
+			Class.forName("org.mariadb.jdbc.Driver");
+			conn = DriverManager.getConnection(dbURL, dbID, dbPWD);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}	
+
+	public void closeConn(ResultSet rs, PreparedStatement pstmt, Connection conn) {
+		try {
+			if(rs != null) rs.close();
+			if(pstmt != null) pstmt.close();
+			if(conn != null) conn.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public int getCount() {
+		int count = 0;
+		try {
+    		conn = openConn();        	
+    		sql = "select count(*) from learning;";
+    		pstmt = conn.prepareStatement(sql);        			
+    		rs = pstmt.executeQuery();
+    		if(rs.next()) {
+    			count = rs.getInt(1);  			
+    		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeConn(rs, pstmt, conn);			
+		}
+		return count;
+	}
+	
+	public List<LearningDTO> inquery(String startDate, String endDate, String learning_emp, int page, int rowsize) {
+		List<LearningDTO> list = new ArrayList<LearningDTO>();
+		try {
+    		conn = openConn();
+    		
+    		if(startDate.isEmpty() && endDate.isEmpty() && learning_emp.isEmpty()) {
+    			sql = "select r.* from (select * from learning order by learning_id desc)r limit=? offset=?";
+    			pstmt = conn.prepareStatement(sql);
+    			pstmt.setInt(1, page*rowsize);
+    			pstmt.setInt(2, (page-1)*rowsize);
+    		}else if(!startDate.isEmpty() && !endDate.isEmpty() && learning_emp.isEmpty()) {
+    			sql = "select * from learning";
+    		}else if(!startDate.isEmpty() && endDate.isEmpty() && learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}else if(startDate.isEmpty() && !endDate.isEmpty() && learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}else if(startDate.isEmpty() && endDate.isEmpty() && !learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}else if(!startDate.isEmpty() && endDate.isEmpty() && !learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}else if(startDate.isEmpty() && !endDate.isEmpty() && !learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}else if(!startDate.isEmpty() && !endDate.isEmpty() && !learning_emp.isEmpty()) {
+    			sql = "select count(*) from learning";
+    		}   		
+    		     			
+    		rs = pstmt.executeQuery();
+    		if(rs.next()) {
+    				
+    		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeConn(rs, pstmt, conn);			
+		}
+		return list;		
+	}
+
+	public int nextPage(int page) {		
+		try {
+    		conn = openConn();        	
+    		sql = "select * from learning where learning_id >= ?";
+    		pstmt = conn.prepareStatement(sql);  
+    		pstmt.setInt(1, page);
+    		rs = pstmt.executeQuery();
+    		if(rs.next()) {
+    			count = rs.getInt(1);  			
+    		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeConn(rs, pstmt, conn);			
+		}
+		return count;
+	}
+	
+	
+	public List<LearningDTO> getLearnList(int no) {
+		List<LearningDTO> list = new ArrayList<LearningDTO>();
+		try {
+    		conn = openConn();
+        	if(no == 0) {
+        		sql = "select * from learning";        		
+        		pstmt = conn.prepareStatement(sql);
+        	}else{
+	    		sql = "select * from learning where learning_id = ?";
+	    		pstmt = conn.prepareStatement(sql);
+	    		pstmt.setInt(1, no);	    		
+        	}    		
+    		rs = pstmt.executeQuery();
+    		
+    		while(rs.next()) {
+    			LearningDTO dto = new LearningDTO();
+    			dto.setLearning_id(rs.getString(1));
+    			dto.setLearning_date(rs.getString(2).substring(0,19));
+    			dto.setBatchsize(rs.getInt(3));
+    			dto.setEpoch(rs.getInt(4));
+    			dto.setMetrics_value(rs.getFloat(5));
+    			dto.setRf_value(rs.getFloat(6));
+    			dto.setRoc_value(rs.getFloat(7));
+    			dto.setF1_value(rs.getFloat(8));
+    			dto.setLearning_emp(rs.getString(9));
+    			dto.setLearning_state(rs.getString(10));
+    			dto.setDataset_file(rs.getString(11));
+    			dto.setThreshold_2(rs.getFloat(12));
+    			dto.setThreshold_3(rs.getFloat(13));
+    			dto.setThreshold_4(rs.getFloat(14));
+    			dto.setThreshold_5(rs.getFloat(15));
+    			dto.setThreshold_6(rs.getFloat(16));
+    			dto.setThreshold_7(rs.getFloat(17));
+    			dto.setThreshold_8(rs.getFloat(18));
+    			dto.setThreshold_9(rs.getFloat(19));
+    			dto.setThreshold_10(rs.getFloat(20));
+    			dto.setThreshold_11(rs.getFloat(21));
+    			dto.setThreshold_12(rs.getFloat(22));
+    			dto.setThreshold_13(rs.getFloat(23));
+    			dto.setThreshold_14(rs.getFloat(24));
+    			dto.setThreshold_15(rs.getFloat(25));
+    			dto.setThreshold_16(rs.getFloat(26));
+    			dto.setThreshold_17(rs.getFloat(27));
+    			dto.setThreshold_18(rs.getFloat(28));
+    			dto.setThreshold_19(rs.getFloat(29));
+    			dto.setDnum_1(rs.getInt(30));
+    			dto.setDnum_2(rs.getInt(31));
+    			dto.setDnum_3(rs.getInt(32));
+    			dto.setDnum_4(rs.getInt(33));
+    			dto.setDnum_5(rs.getInt(34));
+    			dto.setDnum_6(rs.getInt(35));
+    			dto.setDnum_7(rs.getInt(36));
+    			dto.setDnum_8(rs.getInt(37));
+    			dto.setDnum_9(rs.getInt(38));
+    			dto.setDnum_10(rs.getInt(39));
+    			dto.setDnum_11(rs.getInt(40));
+    			dto.setDnum_12(rs.getInt(41));
+    			dto.setDnum_13(rs.getInt(42));
+    			dto.setDnum_14(rs.getInt(43));
+    			dto.setDnum_15(rs.getInt(44));
+    			dto.setDnum_16(rs.getInt(45));
+    			dto.setDnum_17(rs.getInt(46));
+    			dto.setDnum_18(rs.getInt(47));
+    			dto.setDnum_19(rs.getInt(48));
+    			dto.setVar_imp_st(rs.getFloat(49));
+    			dto.setData_num(rs.getInt(50));
+    			dto.setCol_num(rs.getInt(51));
+    			dto.setData_num_after(rs.getInt(52));
+    			dto.setCol_num_after(rs.getInt(53));    			
+    			list.add(dto);    			
+    		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeConn(rs, pstmt, conn);			
+		}
+		return list;	
+	}
+	
+	public List<LearningDTO> searchLearnList(String startDate, String endDate, String learning_emp, int page, int rowsize) {
+		List<LearningDTO> list = new ArrayList<LearningDTO>();
+		int startNo = (page * rowsize) - (rowsize - 1);		// 해당 페이지에서의 첫 글의 번호			
+		int endNo = (page * rowsize);
+		try {
+    		conn = openConn();    		
+        	if(!startDate.isEmpty()  && learning_emp.isEmpty()) {
+        		sql = "select * from learning where learning_date between ? and ? order by learning_id desc limit ?, ?";         		
+        		pstmt = conn.prepareStatement(sql);        		
+        		pstmt.setString(1, startDate);
+        		pstmt.setString(2, endDate);
+        		pstmt.setInt(3, startNo-1);
+        		pstmt.setInt(4, endNo);
+        	}else if(startDate.isEmpty() && !learning_emp.isEmpty()){
+	    		sql = "select * from "
+	    				+ "(select p.*, row_number() over(order by learning_id desc) as rnum from learning p) "
+						+ " where rnum >= ? and rnum <= ? and (learning_emp = ?)";	    				
+	    		pstmt = conn.prepareStatement(sql);	    		
+	    		pstmt.setInt(1, startNo);
+        		pstmt.setInt(2, endNo);
+        		pstmt.setString(3, "%"+learning_emp+"%");
+        	}else if(!startDate.isEmpty() && !learning_emp.isEmpty()){
+	    		sql = "select * from"
+	    				+ "(select @rownum:=@rownum+1 rnum, A.* from learning A,(select @rownum := 0)R where (learning_date between ? and ?) and learning_emp = ?) list"
+						+ " where rnum >= ? and rnum <= ?";	    		
+	    		pstmt = conn.prepareStatement(sql);	    		
+	    		pstmt.setString(1, startDate);
+        		pstmt.setString(2, endDate);
+	    		pstmt.setString(3, "%"+learning_emp+"%");
+	    		pstmt.setInt(4, startNo);
+        		pstmt.setInt(5, endNo);        		
+        	}
+    		rs = pstmt.executeQuery();
+    		
+    		while(rs.next()) {
+    			LearningDTO dto = new LearningDTO();
+    			dto.setLearning_id(rs.getString(1));
+    			dto.setLearning_date(rs.getString(2).substring(0,19));
+    			dto.setBatchsize(rs.getInt(3));
+    			dto.setEpoch(rs.getInt(4));
+    			dto.setMetrics_value(rs.getFloat(5));
+    			dto.setRf_value(rs.getFloat(6));
+    			dto.setRoc_value(rs.getFloat(7));
+    			dto.setF1_value(rs.getFloat(8));
+    			dto.setLearning_emp(rs.getString(9));
+    			dto.setLearning_state(rs.getString(10));
+    			dto.setDataset_file(rs.getString(11));
+    			dto.setThreshold_2(rs.getFloat(12));
+    			dto.setThreshold_3(rs.getFloat(13));
+    			dto.setThreshold_4(rs.getFloat(14));
+    			dto.setThreshold_5(rs.getFloat(15));
+    			dto.setThreshold_6(rs.getFloat(16));
+    			dto.setThreshold_7(rs.getFloat(17));
+    			dto.setThreshold_8(rs.getFloat(18));
+    			dto.setThreshold_9(rs.getFloat(19));
+    			dto.setThreshold_10(rs.getFloat(20));
+    			dto.setThreshold_11(rs.getFloat(21));
+    			dto.setThreshold_12(rs.getFloat(22));
+    			dto.setThreshold_13(rs.getFloat(23));
+    			dto.setThreshold_14(rs.getFloat(24));
+    			dto.setThreshold_15(rs.getFloat(25));
+    			dto.setThreshold_16(rs.getFloat(26));
+    			dto.setThreshold_17(rs.getFloat(27));
+    			dto.setThreshold_18(rs.getFloat(28));
+    			dto.setThreshold_19(rs.getFloat(29));
+    			dto.setDnum_1(rs.getInt(30));
+    			dto.setDnum_2(rs.getInt(31));
+    			dto.setDnum_3(rs.getInt(32));
+    			dto.setDnum_4(rs.getInt(33));
+    			dto.setDnum_5(rs.getInt(34));
+    			dto.setDnum_6(rs.getInt(35));
+    			dto.setDnum_7(rs.getInt(36));
+    			dto.setDnum_8(rs.getInt(37));
+    			dto.setDnum_9(rs.getInt(38));
+    			dto.setDnum_10(rs.getInt(39));
+    			dto.setDnum_11(rs.getInt(40));
+    			dto.setDnum_12(rs.getInt(41));
+    			dto.setDnum_13(rs.getInt(42));
+    			dto.setDnum_14(rs.getInt(43));
+    			dto.setDnum_15(rs.getInt(44));
+    			dto.setDnum_16(rs.getInt(45));
+    			dto.setDnum_17(rs.getInt(46));
+    			dto.setDnum_18(rs.getInt(47));
+    			dto.setDnum_19(rs.getInt(48));
+    			dto.setVar_imp_st(rs.getFloat(49));
+    			dto.setData_num(rs.getInt(50));
+    			dto.setCol_num(rs.getInt(51));
+    			dto.setData_num_after(rs.getInt(52));
+    			dto.setCol_num_after(rs.getInt(53));    			
+    			list.add(dto);    			
+    		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeConn(rs, pstmt, conn);			
+		}
+		return list;
+	}
+
+	
+
+	
+	
+}

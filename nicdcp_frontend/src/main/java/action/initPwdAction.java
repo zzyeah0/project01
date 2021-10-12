@@ -1,0 +1,35 @@
+package action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import model.EmpDAO;
+
+public class initPwdAction implements Action {
+
+	@Override
+	public ActionForward execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		int emp_no = Integer.parseInt(request.getParameter("no"));
+						
+		EmpDAO dao = EmpDAO.getInstance();
+		int res = dao.initPwd(emp_no);			
+
+		PrintWriter out = response.getWriter();
+		if(res > 0) {
+			out.println("<script>");
+			out.println("alert('등록 성공')");
+			out.println("history.go(-1)");
+			out.println("</script>");
+		}else {
+			out.println("<script>");
+			out.println("alert('등록 실패')");
+			out.println("history.back()");
+			out.println("</script>");
+		}		
+		return null;
+	}
+
+}
